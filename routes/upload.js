@@ -18,8 +18,7 @@ router.post('/upload', upload.single('file'), (req, res) => {
     Bucket: process.env.AWS_S3_BUCKET, // Your S3 bucket name
     Key: `${Date.now()}_${file.originalname}`,
     Body: file.buffer,
-    ContentType: file.mimetype,
-    ACL: 'public-read'
+    ContentType: file.mimetype
   };
 
   s3.upload(params, (err, data) => {
