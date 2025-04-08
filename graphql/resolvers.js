@@ -10,6 +10,11 @@ const Category = require('../models/Category');
 
 const resolvers = {
   Query: {
+
+    tags: async () => {
+      return await Tag.find({});
+    },
+
     posts: async () => await Post.find({}),
     post: async (_, { id }) => await Post.findById(id),
     categories: async () => await Category.find({}),

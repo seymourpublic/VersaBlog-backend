@@ -75,6 +75,8 @@ const typeDefs = gql`
 
      postsSummary: PostSummary
     recentPosts: [Post]
+
+    tags: [Tag]   
   }
 
   type Mutation {
