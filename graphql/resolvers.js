@@ -53,48 +53,60 @@ const resolvers = {
     
     // New resolver for dynamic filtering
     filteredPosts: async (_, { filter }) => {
-      // Build the query object from provided filters
       const queryObj = {};
-      
+
       if (filter) {
-        // Filter by category: assumes that `categories` is an array of ObjectIds in Post.
-        // When filtering by subcategory, we treat it the same way.
-        if (filter.categoryId || filter.subcategoryId) {
-          // Prefer subcategory if given, otherwise categoryId.
-          queryObj.categories = filter.subcategoryId || filter.categoryId;
+        // 1. Search text in title or content (case-insensitive)
+        if (filter.searchText) {
+          queryObj.$or = [
+            { title:   { $regex: filter.searchText, $options: 'i' } },
+            { content: { $regex: filter.searchText, $options: 'i' } }
+          ];
         }
-        
-        // Filter by tags: assuming the Post model has a tags field defined as an array.
-        if (filter.tagIds && filter.tagIds.length > 0) {
-          queryObj.tags = { $in: filter.tagIds };
-        }
-        
-        // Filter by published date range
-        if (filter.publishedAfter || filter.publishedBefore) {
-          queryObj.publishedAt = {};
-          if (filter.publishedAfter) {
-            queryObj.publishedAt.$gte = new Date(filter.publishedAfter);
-          }
-          if (filter.publishedBefore) {
-            queryObj.publishedAt.$lte = new Date(filter.publishedBefore);
-          }
-        }
-        
-        // Filter by status (e.g., "published", "draft")
-        if (filter.status) {
+
+        // 2. Filter by status
+        if (filter.status && filter.status !== '') {
           queryObj.status = filter.status;
         }
+
+        // 3. Date range filter on publishedAt
+        if (filter.dateFrom || filter.dateTo) {
+          queryObj.publishedAt = {};
+          if (filter.dateFrom) {
+            queryObj.publishedAt.$gte = new Date(filter.dateFrom);
+          }
+          if (filter.dateTo) {
+            queryObj.publishedAt.$lte = new Date(filter.dateTo);
+          }
+        }
+
+        // 4. Category filter (posts containing this category)
+        if (filter.category && filter.category !== '') {
+          queryObj.categories = filter.category;
+        }
       }
-      
-      // Perform query, sorting results by publication date descending (most recent first)
-      return await Post.find(queryObj).sort({ publishedAt: -1 });
+
+      // Populate categories if needed
+      return await Post.find(queryObj).populate('categories');
     }
   },
   Mutation: {
-    createPost: async (_, args) => {
-      const post = new Post(args);
-      return await post.save();
-    },
+    createPost: async (_, { title, content, slug, status, categories }) => {
+      // If you want to set 'publishedAt' only when status is 'published':
+      let publishedAtValue = null;
+      if (status === 'published') {
+        publishedAtValue = new Date().toISOString();
+      }
+    
+      const newPost = new Post({
+        title,
+        content,
+        slug,
+        status: status || 'draft',
+        publishedAt: publishedAtValue,
+        categories: categories || []
+    })
+  },
     updatePost: async (_, { id, ...updates }) => {
       const post = await Post.findByIdAndUpdate(
         id,
