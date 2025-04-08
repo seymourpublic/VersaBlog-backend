@@ -1,3 +1,5 @@
+// This file defines the Image model for storing image data in MongoDB using Mongoose.
+// It includes fields for post ID, URL, alt text, and upload date.
 // models/Image.js
 const mongoose = require('mongoose');
 

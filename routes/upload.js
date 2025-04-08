@@ -26,7 +26,6 @@ router.post('/upload', upload.single('file'), (req, res) => {
       console.error('S3 Upload Error:', err);
       return res.status(500).json({ error: 'Error uploading file' });
     }
-    // Optionally, you can save the image URL in your database here.
     res.json({ url: data.Location });
   });
 });
