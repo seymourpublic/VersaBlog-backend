@@ -9,6 +9,13 @@ const { gql } = require('apollo-server-express');
 const typeDefs = gql`
   scalar Date
 
+  type PostSummary {
+    totalPosts: Int
+    drafts: Int
+    published: Int
+    pending: Int
+  }
+
   type Post {
     id: ID!
     title: String!
@@ -65,6 +72,9 @@ const typeDefs = gql`
     
     # (If you already have a text search query, that remains separate)
     searchPosts(query: String!): [Post]
+
+     postsSummary: PostSummary
+    recentPosts: [Post]
   }
 
   type Mutation {

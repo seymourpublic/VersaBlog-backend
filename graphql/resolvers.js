@@ -14,6 +14,29 @@ const resolvers = {
     post: async (_, { id }) => await Post.findById(id),
     categories: async () => await Category.find({}),
     category: async (_, { id }) => await Category.findById(id),
+
+    // Resolver for postsSummary query
+    postsSummary: async () => {
+      // Count all posts and specific statuses using Mongoose's countDocuments method.
+      const totalPosts = await Post.countDocuments({});
+      const drafts = await Post.countDocuments({ status: 'draft' });
+      const published = await Post.countDocuments({ status: 'published' });
+      const pending = await Post.countDocuments({ status: 'pending' });
+
+      return {
+        totalPosts,
+        drafts,
+        published,
+        pending,
+      };
+    },
+
+    recentPosts: async () => {
+      // Return the 5 most recent published posts, sorted by publishedAt descending.
+      return await Post.find({ status: 'published' })
+        .sort({ publishedAt: -1 })
+        .limit(5);
+    },
     
     // Full-text search resolver (from previous implementation)
     searchPosts: async (_, { query }) => {
