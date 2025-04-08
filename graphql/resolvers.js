@@ -91,22 +91,10 @@ const resolvers = {
     }
   },
   Mutation: {
-    createPost: async (_, { title, content, slug, status, categories }) => {
-      // If you want to set 'publishedAt' only when status is 'published':
-      let publishedAtValue = null;
-      if (status === 'published') {
-        publishedAtValue = new Date().toISOString();
-      }
-    
-      const newPost = new Post({
-        title,
-        content,
-        slug,
-        status: status || 'draft',
-        publishedAt: publishedAtValue,
-        categories: categories || []
-    })
-  },
+    createPost: async (_, args) => {
+      const post = new Post(args);
+      return await post.save();
+    },
     updatePost: async (_, { id, ...updates }) => {
       const post = await Post.findByIdAndUpdate(
         id,
