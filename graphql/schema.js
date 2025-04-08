@@ -7,14 +7,16 @@
 const { gql } = require('apollo-server-express');
 
 const typeDefs = gql`
+  scalar Date
+
   type Post {
     id: ID!
     title: String!
     content: String!
     slug: String
     status: String
-    publishedAt: String
-    updatedAt: String
+    publishedAt: Date
+    updatedAt: Date
     version: Int
     images: [Image]
     categories: [Category]
@@ -26,7 +28,7 @@ const typeDefs = gql`
     postId: ID!
     url: String!
     altText: String
-    uploadedAt: String
+    uploadedAt: Date
   }
 
   type Tag {
@@ -43,13 +45,25 @@ const typeDefs = gql`
     subcategories: [Category]
   }
 
+  input PostFilter {
+    categoryId: ID
+    subcategoryId: ID
+    tagIds: [ID!]
+    publishedAfter: Date
+    publishedBefore: Date
+    status: String
+  }
+
   type Query {
     posts: [Post]
     post(id: ID!): Post
     categories: [Category]
     category(id: ID!): Category
 
-    # New search query for full-text search
+    # Query with dynamic filters
+    filteredPosts(filter: PostFilter): [Post]
+    
+    # (If you already have a text search query, that remains separate)
     searchPosts(query: String!): [Post]
   }
 
@@ -65,4 +79,5 @@ const typeDefs = gql`
 `;
 
 module.exports = { typeDefs };
+
 
