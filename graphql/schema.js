@@ -3,6 +3,7 @@
 // It includes types for Post, Image, Tag, and Category, along with queries and mutations for managing these entities.
 // The schema is exported for use in the Apollo Server setup.
 // File: graphql/schema.js
+// graphql/schema.js
 const { gql } = require('apollo-server-express');
 
 const typeDefs = gql`
@@ -47,6 +48,9 @@ const typeDefs = gql`
     post(id: ID!): Post
     categories: [Category]
     category(id: ID!): Category
+
+    # New search query for full-text search
+    searchPosts(query: String!): [Post]
   }
 
   type Mutation {
@@ -61,3 +65,4 @@ const typeDefs = gql`
 `;
 
 module.exports = { typeDefs };
+
