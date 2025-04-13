@@ -124,6 +124,26 @@ const resolvers = {
       );
       return category;
     },
+    updatePostCategory: async (_, { postId, categoryId }) => {
+      // 1. Find the post by ID
+      const post = await Post.findById(postId);
+      if (!post) {
+        throw new Error("Post not found");
+      }
+
+      // 2. Update the post's categories array
+      // If you only allow one category, set it to `[ categoryId ]`
+      // If multiple categories are allowed, you might push or splice:
+      post.categories = [categoryId];
+
+      // 3. Optionally update 'updatedAt' field
+      post.updatedAt = Date.now();
+
+      // 4. Save changes
+      await post.save();
+
+      return post;
+    },
     deleteCategory: async (_, { id }) => {
       await Category.findByIdAndDelete(id);
       return true;

@@ -53,6 +53,7 @@ const typeDefs = gql`
   }
 
   input PostFilter {
+    searchText: String
     categoryId: ID
     subcategoryId: ID
     tagIds: [ID!]
@@ -77,16 +78,25 @@ const typeDefs = gql`
     recentPosts: [Post]
 
     tags: [Tag]   
+
+    
   }
 
   type Mutation {
-    createPost(title: String!, content: String!, slug: String, status: String): Post
+    createPost(
+    title: String!,
+    content: String!,
+    slug: String!,
+    status: String,
+    categories: [ID!]
+    ): Post
     updatePost(id: ID!, title: String, content: String, slug: String, status: String): Post
     deletePost(id: ID!): Boolean
 
     createCategory(name: String!, slug: String!, description: String, parentId: ID): Category
     updateCategory(id: ID!, name: String, slug: String, description: String, parentId: ID): Category
     deleteCategory(id: ID!): Boolean
+    updatePostCategory(postId: ID!, categoryId: ID!): Post
   }
 `;
 
