@@ -52,44 +52,47 @@ const resolvers = {
     },
     
     // New resolver for dynamic filtering
-    filteredPosts: async (_, { filter }) => {
-      const queryObj = {};
+filteredPosts: async (_, { filter = {} }) => {
+  const queryObj = {};
 
-      if (filter) {
-        // 1. Search text in title or content (case-insensitive)
-        if (filter.searchText) {
-          queryObj.$or = [
-            { title:   { $regex: filter.searchText, $options: 'i' } },
-            { content: { $regex: filter.searchText, $options: 'i' } }
-          ];
-        }
+  // 1. Handle search text (using regex or text search)
+  if (filter.searchText) {
+    // Option 1: Use regex search (case-insensitive)
+    queryObj.$or = [
+      { title: { $regex: filter.searchText, $options: 'i' } },
+      { content: { $regex: filter.searchText, $options: 'i' } }
+    ];
+    
+    // OR Option 2: Use MongoDB text search (more efficient)
+    // queryObj.$text = { $search: filter.searchText };
+  }
 
-        // 2. Filter by status
-        if (filter.status && filter.status !== '') {
-          queryObj.status = filter.status;
-        }
+  // 2. Handle category filter (fixed to match the input type)
+  if (filter.categoryId) {
+    queryObj.categories = filter.categoryId;
+  }
 
-        // 3. Date range filter on publishedAt
-        if (filter.dateFrom || filter.dateTo) {
-          queryObj.publishedAt = {};
-          if (filter.dateFrom) {
-            queryObj.publishedAt.$gte = new Date(filter.dateFrom);
-          }
-          if (filter.dateTo) {
-            queryObj.publishedAt.$lte = new Date(filter.dateTo);
-          }
-        }
+  // 3. Other filters (status, date range etc.)
+  if (filter.status) {
+    queryObj.status = filter.status;
+  }
 
-        // 4. Category filter (posts containing this category)
-        if (filter.category && filter.category !== '') {
-          queryObj.categories = filter.category;
-        }
-      }
-
-      // Populate categories if needed
-      return await Post.find(queryObj).populate('categories');
+  if (filter.publishedAfter || filter.publishedBefore) {
+    queryObj.publishedAt = {};
+    if (filter.publishedAfter) {
+      queryObj.publishedAt.$gte = new Date(filter.publishedAfter);
     }
-  },
+    if (filter.publishedBefore) {
+      queryObj.publishedAt.$lte = new Date(filter.publishedBefore);
+    }
+  }
+
+  // Populate categories and return results
+  return await Post.find(queryObj).populate('categories');
+}
+},
+
+  
   Mutation: {
     createPost: async (_, args) => {
       const post = new Post(args);
