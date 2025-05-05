@@ -49,7 +49,7 @@ This backend serves as the core engine for the VersaBlog platform. It manages bl
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/your-username/versa-blog-backend.git
+   git clone https://github.com/seymourpublic/versa-blog-backend.git
    cd versa-blog-backend
 
     Install Dependencies:
